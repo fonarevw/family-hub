@@ -64,9 +64,7 @@ export function NotesPage() {
     }
   }
 
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+
 
   async function uploadFile(file: File): Promise<string | null> {
     if (!supabase) return null;
