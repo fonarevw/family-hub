@@ -461,11 +461,16 @@
 
 @media (max-width: 640px) {
   .layout-header {
-    padding-inline: 0.8rem;
+    display: none;
   }
 
   .layout-main {
     padding-inline: 0.8rem;
+    padding-top: 1rem;
+  }
+
+  .layout-footer {
+    display: none;
   }
 
   .chat-messages {
