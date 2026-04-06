@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <!-- ???????? ???????? ?????, ????? ?????????: npm run icons -->
+  <defs>
+    <linearGradient id="bg" x1="48" y1="40" x2="472" y2="480" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1f6b52"/>
+      <stop offset="1" stop-color="#12362a"/>
+    </linearGradient>
+  </defs>
+  <rect x="32" y="32" width="448" height="448" rx="96" fill="url(#bg)"/>
+  <path fill="#e8f4ef" d="M256 112 112 272V400h288V272L256 112z" />
+</svg>
