@@ -37,10 +37,8 @@ export function CalendarPage() {
       >
         <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Название события" />
         <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
-        <input value={comment} onChange={(e) => setComment(e.target.value)} placeholder="Комментарий (необязательно)" />
-        <button type="submit" className="btn-primary">
-          Добавить событие
-        </button>
+        <input value={comment} onChange={(e) => setComment(e.target.value)} placeholder="Комментарий" />
+        <button type="submit" className="btn-primary">Добавить</button>
       </form>
 
       {events.length === 0 ? (

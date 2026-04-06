@@ -28,9 +28,7 @@ export function FridgePage() {
         if (active) setLoading(false);
       }
     })();
-    return () => {
-      active = false;
-    };
+    return () => { active = false; };
   }, []);
 
   const filtered = useMemo(() => {
@@ -81,7 +79,7 @@ export function FridgePage() {
   return (
     <>
       <h1 className="page-title">Электронный холодильник</h1>
-      <p className="page-lead">Удобный семейный учёт: что есть дома и что нужно докупить. Данные общие для всех авторизованных членов семьи.</p>
+      <p className="page-lead">Удобный семейный учёт: что есть дома и что нужно докупить.</p>
 
       <section className="fridge-top-grid">
         <article className="card fridge-stat-card">
@@ -100,50 +98,35 @@ export function FridgePage() {
           onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
           placeholder="Название продукта"
           autoComplete="off"
-          aria-label="Название продукта"
         />
         <div className="quantity-control">
           <button type="button" className="quantity-btn" onClick={() => setForm((prev) => ({ ...prev, quantity: Math.max(1, prev.quantity - 1) }))}>−</button>
           <span className="quantity-value">{form.quantity}</span>
           <button type="button" className="quantity-btn" onClick={() => setForm((prev) => ({ ...prev, quantity: prev.quantity + 1 }))}>+</button>
         </div>
-        <select value={form.category} onChange={(e) => setForm((prev) => ({ ...prev, category: e.target.value }))} aria-label="Категория">
+        <select value={form.category} onChange={(e) => setForm((prev) => ({ ...prev, category: e.target.value }))}>
           {categories.map((category) => (
-            <option key={category} value={category}>
-              {category}
-            </option>
+            <option key={category} value={category}>{category}</option>
           ))}
         </select>
-        <select
-          value={form.status}
-          onChange={(e) => setForm((prev) => ({ ...prev, status: e.target.value as ProductStatus }))}
-          aria-label="Статус продукта"
-        >
+        <select value={form.status} onChange={(e) => setForm((prev) => ({ ...prev, status: e.target.value as ProductStatus }))}>
           <option value="buy">Нужно купить</option>
           <option value="in">Уже есть</option>
         </select>
-        <button type="submit" className="btn-primary">
-          Добавить
-        </button>
+        <button type="submit" className="btn-primary">Добавить</button>
       </form>
 
       <div className="fridge-filter">
-        <button type="button" className={filter === 'all' ? 'pill active' : 'pill'} onClick={() => setFilter('all')}>
-          Все
-        </button>
-        <button type="button" className={filter === 'in' ? 'pill active' : 'pill'} onClick={() => setFilter('in')}>
-          Есть
-        </button>
-        <button type="button" className={filter === 'buy' ? 'pill active' : 'pill'} onClick={() => setFilter('buy')}>
-          Купить
-        </button>
+        <button type="button" className={filter === 'all' ? 'pill active' : 'pill'} onClick={() => setFilter('all')}>Все</button>
+        <button type="button" className={filter === 'in' ? 'pill active' : 'pill'} onClick={() => setFilter('in')}>Есть</button>
+        <button type="button" className={filter === 'buy' ? 'pill active' : 'pill'} onClick={() => setFilter('buy')}>Купить</button>
       </div>
 
       <section className="fridge-list">
         {loading ? (
-          <article className="card">Загрузка базы продуктов...</article>
+          <article className="card">Загрузка...</article>
         ) : filtered.length === 0 ? (
-          <article className="card">Пока пусто. Добавьте первый продукт в холодильник.</article>
+          <article className="card">Пока пусто.</article>
         ) : (
           filtered.map((product) => (
             <article key={product.id} className="card fridge-item">
@@ -158,11 +141,9 @@ export function FridgePage() {
               </div>
               <div className="fridge-item-actions">
                 <button type="button" className="pill" onClick={() => onToggle(product)}>
-                  {product.status === 'in' ? 'В список покупок' : 'Переместить в "есть"'}
+                  {product.status === 'in' ? 'В список' : 'Есть'}
                 </button>
-                <button type="button" className="icon-btn" onClick={() => onDelete(product)} aria-label={`Удалить ${product.name}`}>
-                  ×
-                </button>
+                <button type="button" className="icon-btn" onClick={() => onDelete(product)}>×</button>
               </div>
             </article>
           ))

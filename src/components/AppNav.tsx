@@ -17,7 +17,7 @@ export function AppNav() {
         Списки
       </NavLink>
       <NavLink to="/notes" className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}>
-        Заметки
+        💬 Чат
       </NavLink>
     </nav>
   );
