@@ -1,7 +1,3 @@
-/**
- * Растеризация public/icon.svg → PNG для PWA и iOS.
- * Запуск: npm run icons
- */
 import sharp from 'sharp';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
