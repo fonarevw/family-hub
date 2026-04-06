@@ -122,6 +122,57 @@
   gap: 0.5rem;
 }
 
+.fridge-item-info {
+  flex: 1;
+}
+
+.quantity-control {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid rgba(132, 155, 143, 0.4);
+  border-radius: 12px;
+  padding: 0.4rem 0.6rem;
+}
+
+.quantity-control-sm {
+  padding: 0.25rem 0.4rem;
+}
+
+.quantity-btn {
+  width: 1.75rem;
+  height: 1.75rem;
+  border: none;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 50%;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 100ms ease;
+}
+
+.quantity-btn:hover {
+  transform: scale(1.1);
+}
+
+.quantity-control-sm .quantity-btn {
+  width: 1.5rem;
+  height: 1.5rem;
+  font-size: 1rem;
+}
+
+.quantity-value {
+  min-width: 1.5rem;
+  text-align: center;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
 .icon-btn {
   border: 1px solid rgba(132, 155, 143, 0.38);
   background: rgba(255, 255, 255, 0.66);
@@ -146,7 +197,6 @@
   }
 
   .fridge-item {
-    flex-direction: column;
-    align-items: flex-start;
+    flex-wrap: wrap;
   }
 }

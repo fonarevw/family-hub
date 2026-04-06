@@ -3,14 +3,14 @@ import { supabase, type FridgeRow } from '../lib/supabase';
 import '../components/Layout.css';
 import './FridgePage.css';
 
-const categories = ['База', 'Овощи', 'Фрукты', 'Молочка', 'Мясо', 'Крупы', 'Заморозка', 'Другое'];
+const categories = ['База', 'Овощи', 'Фрукты', 'Молочка', 'Мясо', 'Крупы', 'Заморозка', 'Хлеб', 'Сладкое', 'Мороженое', 'Еда собаке', 'Еда кошке', 'Другое'];
 type ProductStatus = 'in' | 'buy';
 
 export function FridgePage() {
   const [products, setProducts] = useState<FridgeRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<ProductStatus | 'all'>('all');
-  const [form, setForm] = useState({ name: '', quantity: '', category: categories[0], status: 'buy' as ProductStatus });
+  const [form, setForm] = useState({ name: '', quantity: 1, category: categories[0], status: 'buy' as ProductStatus });
 
   async function refresh() {
     if (!supabase) return;
@@ -48,11 +48,11 @@ export function FridgePage() {
     await supabase.from('fridge_items').insert({
       name,
       category: form.category,
-      quantity: form.quantity.trim(),
+      quantity: form.quantity,
       status: form.status,
       updated_at: new Date().toISOString(),
     });
-    setForm((prev) => ({ ...prev, name: '', quantity: '' }));
+    setForm((prev) => ({ ...prev, name: '', quantity: 1 }));
     await refresh();
   }
 
@@ -68,6 +68,13 @@ export function FridgePage() {
   async function onDelete(product: FridgeRow) {
     if (!supabase) return;
     await supabase.from('fridge_items').delete().eq('id', product.id);
+    await refresh();
+  }
+
+  async function onChangeQuantity(product: FridgeRow, delta: number) {
+    if (!supabase) return;
+    const newQty = Math.max(1, product.quantity + delta);
+    await supabase.from('fridge_items').update({ quantity: newQty, updated_at: new Date().toISOString() }).eq('id', product.id);
     await refresh();
   }
 
@@ -95,13 +102,11 @@ export function FridgePage() {
           autoComplete="off"
           aria-label="Название продукта"
         />
-        <input
-          value={form.quantity}
-          onChange={(e) => setForm((prev) => ({ ...prev, quantity: e.target.value }))}
-          placeholder="Количество, например 2 шт"
-          autoComplete="off"
-          aria-label="Количество"
-        />
+        <div className="quantity-control">
+          <button type="button" className="quantity-btn" onClick={() => setForm((prev) => ({ ...prev, quantity: Math.max(1, prev.quantity - 1) }))}>−</button>
+          <span className="quantity-value">{form.quantity}</span>
+          <button type="button" className="quantity-btn" onClick={() => setForm((prev) => ({ ...prev, quantity: prev.quantity + 1 }))}>+</button>
+        </div>
         <select value={form.category} onChange={(e) => setForm((prev) => ({ ...prev, category: e.target.value }))} aria-label="Категория">
           {categories.map((category) => (
             <option key={category} value={category}>
@@ -142,12 +147,14 @@ export function FridgePage() {
         ) : (
           filtered.map((product) => (
             <article key={product.id} className="card fridge-item">
-              <div>
+              <div className="fridge-item-info">
                 <p className="fridge-item-title">{product.name}</p>
-                <p className="fridge-item-meta">
-                  {product.category}
-                  {product.quantity ? ` • ${product.quantity}` : ''}
-                </p>
+                <p className="fridge-item-meta">{product.category}</p>
+              </div>
+              <div className="quantity-control quantity-control-sm">
+                <button type="button" className="quantity-btn" onClick={() => onChangeQuantity(product, -1)}>−</button>
+                <span className="quantity-value">{product.quantity}</span>
+                <button type="button" className="quantity-btn" onClick={() => onChangeQuantity(product, 1)}>+</button>
               </div>
               <div className="fridge-item-actions">
                 <button type="button" className="pill" onClick={() => onToggle(product)}>

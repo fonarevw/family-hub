@@ -10,7 +10,7 @@ export type FridgeRow = {
   id: number;
   name: string;
   category: string;
-  quantity: string;
+  quantity: number;
   status: 'in' | 'buy';
   updated_at: string;
 };
