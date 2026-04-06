@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { AppNav } from './AppNav';
+import { ProfileButton } from './ProfileButton';
 import './Layout.css';
 
 type Props = { children: ReactNode };
@@ -12,7 +13,10 @@ export function Layout({ children }: Props) {
           <span className="layout-title">Семья</span>
           <span className="layout-domain">fonarevtd.ru</span>
         </div>
-        <AppNav />
+        <div className="layout-nav-row">
+          <AppNav />
+          <ProfileButton />
+        </div>
       </header>
       <main className="layout-main">{children}</main>
       <footer className="layout-footer">

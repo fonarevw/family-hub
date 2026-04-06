@@ -1,77 +1,122 @@
 import { useEffect, useState, useRef } from 'react';
 import { supabase } from '../lib/supabase';
-import { useLocalStorage } from '../hooks/useLocalStorage';
 import '../components/Layout.css';
 
+type Account = {
+  id: string;
+  name: string;
+  birthday: string | null;
+  avatar_emoji: string;
+  avatar_color: string;
+  avatar_url: string | null;
+  user_id: string;
+};
+
 type Message = {
-  id: number;
+  id: string;
   user_id: string;
   nickname: string;
-  avatar: string;
+  avatar_emoji: string;
+  avatar_color: string;
+  avatar_url: string | null;
   text: string;
+  image_url: string | null;
+  file_url: string | null;
+  file_name: string | null;
   created_at: string;
 };
 
-const avatars = ['😀', '😎', '🤗', '🥰', '😇', '🤠', '🧑‍💻', '👨‍🍳', '👩‍🎨', '🧑‍🚀'];
-const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#98D8C8', '#F7DC6F'];
-
-function getAvatar(nickname: string): string {
-  const hash = nickname.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
-  return avatars[hash % avatars.length];
-}
-
-function getColor(nickname: string): string {
-  const hash = nickname.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
-  return colors[hash % colors.length];
-}
-
 export function NotesPage() {
+  const [account, setAccount] = useState<Account | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
-  const [nickname, setNickname] = useLocalStorage('family_nickname', '');
-  const [newNickname, setNewNickname] = useState('');
   const [input, setInput] = useState('');
-  const [isEditingName, setIsEditingName] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    void loadAccount();
+    void loadMessages();
+    
+    const interval = setInterval(() => void loadMessages(), 2000);
+    return () => clearInterval(interval);
+  }, []);
+
+  async function loadAccount() {
+    if (!supabase) return;
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    const { data } = await supabase.from('family_accounts').select('*').eq('user_id', user.id).single();
+    if (data) {
+      setAccount(data as Account);
+    }
+  }
 
   async function loadMessages() {
     if (!supabase) return;
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('family_chat')
       .select('*')
       .order('created_at', { ascending: true })
-      .limit(100);
-    setMessages(data ?? []);
+      .limit(200);
+    if (!error && data) {
+      setMessages(data);
+    }
   }
-
-  useEffect(() => {
-    void loadMessages();
-    const interval = setInterval(() => void loadMessages(), 3000);
-    return () => clearInterval(interval);
-  }, []);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  async function uploadFile(file: File): Promise<string | null> {
+    if (!supabase) return null;
+    const ext = file.name.split('.').pop();
+    const path = `chat/${Date.now()}.${ext}`;
+    const { error } = await supabase.storage.from('chat-files').upload(path, file);
+    if (error) {
+      console.error('Upload error:', error);
+      return null;
+    }
+    const { data } = supabase.storage.from('chat-files').getPublicUrl(path);
+    return data.publicUrl;
+  }
+
   async function sendMessage() {
     const text = input.trim();
-    if (!text || !supabase || !nickname) return;
-    await supabase.from('family_chat').insert({
-      user_id: 'local',
-      nickname,
-      avatar: getAvatar(nickname),
-      text,
+    if (!text && !selectedImage) return;
+    if (!supabase || !account) return;
+
+    const { error } = await supabase.from('family_chat').insert({
+      user_id: account.id,
+      nickname: account.name,
+      avatar_emoji: account.avatar_emoji,
+      avatar_color: account.avatar_color,
+      avatar_url: account.avatar_url,
+      text: text || (selectedImage ? '📷 Фото' : ''),
+      image_url: selectedImage,
+      file_url: null,
+      file_name: null,
       created_at: new Date().toISOString(),
     });
+
+    if (error) {
+      console.error('Send error:', error);
+      return;
+    }
+
     setInput('');
+    setSelectedImage(null);
     await loadMessages();
   }
 
-  function saveNickname() {
-    const name = newNickname.trim();
-    if (!name) return;
-    setNickname(name);
-    setIsEditingName(false);
+  async function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const url = await uploadFile(file);
+    if (url && file.type.startsWith('image/')) {
+      setSelectedImage(url);
+    }
+    if (fileInputRef.current) fileInputRef.current.value = '';
   }
 
   function formatTime(dateStr: string): string {
@@ -79,35 +124,18 @@ export function NotesPage() {
     return d.toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' });
   }
 
-  function formatDate(dateStr: string): string {
-    const d = new Date(dateStr);
-    const today = new Date();
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
-    
-    if (d.toDateString() === today.toDateString()) return 'Сегодня';
-    if (d.toDateString() === yesterday.toDateString()) return 'Вчера';
-    return d.toLocaleDateString('ru', { day: 'numeric', month: 'short' });
+  function renderAvatar(msg: Message) {
+    if (msg.avatar_url) {
+      return <img src={msg.avatar_url} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />;
+    }
+    return msg.avatar_emoji;
   }
 
-  if (!nickname) {
+  if (!account) {
     return (
       <div className="nickname-setup">
         <h1 className="page-title">💬 Семейный чат</h1>
-        <p className="page-lead">Как тебя зовут?</p>
-        <div className="card nickname-card">
-          <input
-            type="text"
-            value={newNickname}
-            onChange={(e) => setNewNickname(e.target.value)}
-            placeholder="Введи имя..."
-            onKeyDown={(e) => e.key === 'Enter' && void saveNickname()}
-            autoFocus
-          />
-          <button className="btn-primary" onClick={() => void saveNickname()}>
-            Войти в чат
-          </button>
-        </div>
+        <p className="page-lead">Сначала войди в аккаунт</p>
       </div>
     );
   }
@@ -115,50 +143,41 @@ export function NotesPage() {
   return (
     <>
       <div className="chat-header">
-        <h1 className="page-title">💬 Семейный чат</h1>
-        <button className="edit-name-btn" onClick={() => { setNewNickname(nickname); setIsEditingName(true); }}>
-          {getAvatar(nickname)} {nickname} ▼
-        </button>
+        <div>
+          <h1 className="page-title" style={{ margin: 0 }}>💬 Семейный чат</h1>
+          <p className="page-lead" style={{ margin: 0 }}>Общайтесь всей семьёй</p>
+        </div>
       </div>
 
-      {isEditingName && (
-        <div className="card nickname-edit">
-          <p>Изменить имя:</p>
-          <div className="nickname-edit-form">
-            <input
-              type="text"
-              value={newNickname}
-              onChange={(e) => setNewNickname(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && void saveNickname()}
-              autoFocus
-            />
-            <button className="pill" onClick={() => void saveNickname()}>✓</button>
-            <button className="pill" onClick={() => setIsEditingName(false)}>✕</button>
-          </div>
-        </div>
-      )}
-
       <div className="chat-messages">
-        {messages.map((msg, i) => {
-          const prevMsg = messages[i - 1];
-          const showDate = !prevMsg || formatDate(msg.created_at) !== formatDate(prevMsg.created_at);
-          const isOwn = msg.nickname === nickname;
+        {messages.map((msg) => {
+          const isOwn = msg.user_id === account.id;
           
           return (
-            <div key={msg.id}>
-              {showDate && <div className="date-divider">{formatDate(msg.created_at)}</div>}
-              <div className={`message ${isOwn ? 'own' : ''}`}>
-                {!isOwn && (
-                  <div className="message-avatar" style={{ background: getColor(msg.nickname) }}>
-                    {msg.avatar}
-                  </div>
-                )}
-                <div className={`message-content ${isOwn ? 'own' : ''}`}>
-                  {!isOwn && <span className="message-nickname">{msg.nickname}</span>}
-                  <div className="message-bubble">
-                    <p>{msg.text}</p>
-                    <span className="message-time">{formatTime(msg.created_at)}</span>
-                  </div>
+            <div key={msg.id} className={`tg-message ${isOwn ? 'own' : ''}`}>
+              {!isOwn && (
+                <div className="tg-avatar" style={{ background: msg.avatar_color }}>
+                  {renderAvatar(msg)}
+                </div>
+              )}
+              <div className="tg-message-body">
+                {!isOwn && <span className="tg-name">{msg.nickname}</span>}
+                <div className="tg-bubble">
+                  {msg.image_url && (
+                    <img 
+                      src={msg.image_url} 
+                      alt="image" 
+                      className="tg-image"
+                      onClick={() => window.open(msg.image_url!, '_blank')}
+                    />
+                  )}
+                  {msg.file_url && !msg.image_url && (
+                    <a href={msg.file_url} target="_blank" rel="noopener" className="file-link">
+                      📎 {msg.file_name}
+                    </a>
+                  )}
+                  {msg.text && <p>{msg.text}</p>}
+                  <span className="tg-time">{formatTime(msg.created_at)}</span>
                 </div>
               </div>
             </div>
@@ -167,15 +186,39 @@ export function NotesPage() {
         <div ref={messagesEndRef} />
       </div>
 
-      <form className="chat-input" onSubmit={(e) => { e.preventDefault(); void sendMessage(); }}>
+      {selectedImage && (
+        <div className="image-preview">
+          <img src={selectedImage} alt="preview" />
+          <button onClick={() => setSelectedImage(null)}>✕</button>
+        </div>
+      )}
+
+      <div className="chat-input">
+        <input
+          type="file"
+          ref={fileInputRef}
+          accept="image/*"
+          onChange={(e) => { void handleFileSelect(e); }}
+          style={{ display: 'none' }}
+        />
+        <button className="pill" onClick={() => fileInputRef.current?.click()} title="Прикрепить фото">
+          📷
+        </button>
         <input
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Напиши сообщение..."
+          onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), void sendMessage())}
         />
-        <button type="submit" disabled={!input.trim()}>→</button>
-      </form>
+        <button 
+          className="send-btn"
+          onClick={() => void sendMessage()}
+          disabled={!input.trim() && !selectedImage}
+        >
+          →
+        </button>
+      </div>
     </>
   );
 }
