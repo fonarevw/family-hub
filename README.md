@@ -23,16 +23,16 @@ A web application for managing family affairs together. Calendar, fridge, shoppi
 
 ## Features
 
-### Calendar
+### 🗓️ Calendar
 Shared calendar for events: birthdays, trips, reminders.
 
-### Fridge
+### 🧊 Fridge
 Track groceries. Categories, quantity, status — at home or need to buy.
 
-### Lists
+### 📝 Lists
 Shared shopping lists. Mark purchased items, add new ones.
 
-### Chat
+### 💬 Chat
 Chat with your family without leaving the app. Discuss tasks and daily routines.
 
 ---
