@@ -1,43 +1,43 @@
 🏠 Family Hub
 ===
 
-Приватное пространство для семьи.
+Private space for your family.
 
 ---
 
-## Описание
+## Description
 
-Веб-приложение для совместного управления семейными делами. Календарь, холодильник, списки покупок и чат — всё в одном месте.
-
----
-
-## Содержание
-
-- [Возможности](#возможности)
-- [Технологии](#технологии)
-- [Запуск](#запуск)
-- [Настройка Supabase](#настройка-supabase)
-- [Структура проекта](#структура-проекта)
+A web application for managing family affairs together. Calendar, fridge, shopping lists, and chat — all in one place.
 
 ---
 
-## Возможности
+## Contents
 
-### Календарь
-Общий календарь для событий: дни рождения, поездки, напоминания.
-
-### Холодильник
-Учёт продуктов. Категории, количество, статус — дома или нужно купить.
-
-### Списки
-Общие списки покупок. Отмечайте купленное, добавляйте новое.
-
-### Чат
-Чат с вашей семьей не выходя из приложения. Обсуждайте дела и ваши распорядки дня.
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Getting Started](#getting-started)
+- [Supabase Setup](#supabase-setup)
+- [Project Structure](#project-structure)
 
 ---
 
-## Технологии
+## Features
+
+### Calendar
+Shared calendar for events: birthdays, trips, reminders.
+
+### Fridge
+Track groceries. Categories, quantity, status — at home or need to buy.
+
+### Lists
+Shared shopping lists. Mark purchased items, add new ones.
+
+### Chat
+Chat with your family without leaving the app. Discuss tasks and daily routines.
+
+---
+
+## Tech Stack
 
 - React 18 + TypeScript
 - Supabase (PostgreSQL)
@@ -47,7 +47,7 @@
 
 ---
 
-## Запуск
+## Getting Started
 
 ```bash
 git clone https://github.com/fonarevw/family-hub.git
@@ -56,7 +56,7 @@ npm install
 cp .env.example .env
 ```
 
-Настройте `.env`:
+Configure `.env`:
 ```
 VITE_SUPABASE_URL=your-supabase-url
 VITE_SUPABASE_ANON_KEY=your-anon-key
@@ -68,28 +68,28 @@ npm run dev
 
 ---
 
-## Настройка Supabase
+## Supabase Setup
 
-1. Создайте проект на supabase.com
-2. SQL Editor — выполните запросы из `SUPABASE_SETUP.md`
-3. Скопируйте ключи в `.env`
+1. Create a project at supabase.com
+2. SQL Editor — run queries from `SUPABASE_SETUP.md`
+3. Copy keys to `.env`
 
 ---
 
-## Структура проекта
+## Project Structure
 
 ```
 src/
-├── components/     # UI компоненты
-├── pages/         # Страницы приложения
-├── hooks/         # React хуки
-└── lib/           # Supabase клиент
+├── components/     # UI components
+├── pages/         # App pages
+├── hooks/         # React hooks
+└── lib/           # Supabase client
 
-public/            # Статические файлы
+public/            # Static files
 ```
 
 ---
 
-## Лицензия
+## License
 
 MIT
